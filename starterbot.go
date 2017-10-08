@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+var errorStr = "ERROR:"
+var infoStr = "INFO: "
+
 // Settings contains all initial game settings
 type Settings struct {
 	timebank, timePerMove, yourBotID, fieldWidth, fieldHeight, maxRounds int
@@ -56,7 +59,7 @@ func processInput() {
 	case "settings":
 		ParseSettings(&settings, command)
 	case "update":
-		ParseUpdate(&settings, command)
+		ParseUpdate(&game, command)
 	case "action":
 		switch ParseAction(&game, command) {
 		case "character":
@@ -64,11 +67,12 @@ func processInput() {
 		case "move":
 			DoMove()
 		default:
-			fmt.Fprintf(os.Stderr, "ERROR: Unrecognized return from ParseAction")
+			fmt.Fprintf(os.Stderr, errorStr+"Unrecognized return from ParseAction")
 		}
 	default:
 		fmt.Fprintf(os.Stderr, "Received unhandled command type: %s\n", command)
 		fmt.Fprintf(os.Stderr, "Settings: %+#v\n", settings)
+		fmt.Fprintf(os.Stderr, "State: %+#v", game)
 	}
 
 }
