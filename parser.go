@@ -72,7 +72,13 @@ func ParseUpdate(settings *Settings, command []string) {
 
 // ParseAction takes a State object to modify,
 // and a command tuple of the format "action character t"
-func ParseAction(state *State, command []string) (doMove bool) {
+func ParseAction(state *State, command []string) (commandType string) {
 	fmt.Println("INFO: Parsing action: ", command)
-	return false
+	timeRemaining, err := strconv.Atoi(command[2])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "ERROR: Unable to parse time remaining. Detail: ", command)
+	}
+	(*state).timeRemaining = timeRemaining
+
+	return command[1]
 }
