@@ -15,19 +15,19 @@ func ParseSettings(settings *Settings, command []string) {
 	case "timebank":
 		time, err := strconv.Atoi(command[2])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, errorStr+" to convert command argument to int. Error:", err)
+			fmt.Fprintln(os.Stderr, errorStr+"Unable to convert command argument to int. Error:", err)
 		}
 		(*settings).timebank = time
 	case "time_per_move":
 		time, err := strconv.Atoi(command[2])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, errorStr+" to convert command argument to int. Error:", err)
+			fmt.Fprintln(os.Stderr, errorStr+"Unable to convert command argument to int. Error:", err)
 		}
 		(*settings).timePerMove = time
 	case "player_names":
 		names := strings.Split(command[2], ",")
 		if len(names) != 2 {
-			fmt.Fprintln(os.Stderr, "player_names was unable to parse into []string of length 2. Detail: names=", names)
+			fmt.Fprintln(os.Stderr, errorStr+"player_names was unable to parse into []string of length 2. Detail: names=", names)
 		}
 		(*settings).playerNames = names
 	case "your_bot":
@@ -35,29 +35,29 @@ func ParseSettings(settings *Settings, command []string) {
 	case "your_botid":
 		ID, err := strconv.Atoi(command[2])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, errorStr+" to parse bot id. Error: ", err, " Detail: ", command)
+			fmt.Fprintln(os.Stderr, errorStr+"Unable to parse bot id. Error: ", err, " Detail: ", command)
 		}
 		(*settings).yourBotID = ID
 	case "field_width":
 		width, err := strconv.Atoi(command[2])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, errorStr+" to parse width. Error: ", err, " Detail: ", command)
+			fmt.Fprintln(os.Stderr, errorStr+"Unable to parse width. Error: ", err, " Detail: ", command)
 		}
 		(*settings).fieldWidth = width
 	case "field_height":
 		height, err := strconv.Atoi(command[2])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, errorStr+" to parse height. Error: ", err, " Detail: ", command)
+			fmt.Fprintln(os.Stderr, errorStr+"Unable to parse height. Error: ", err, " Detail: ", command)
 		}
 		(*settings).fieldHeight = height
 	case "max_rounds":
 		rounds, err := strconv.Atoi(command[2])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, errorStr+" to parse max rounds. Error: ", err, " Detail: ", command)
+			fmt.Fprintln(os.Stderr, errorStr+"Unable to parse max rounds. Error: ", err, " Detail: ", command)
 		}
 		(*settings).maxRounds = rounds
 	default:
-		fmt.Fprintln(os.Stderr, "Unhandled settings field. Detail:", command)
+		fmt.Fprintln(os.Stderr, errorStr+"Unhandled settings field. Detail:", command)
 	}
 }
 
@@ -74,6 +74,11 @@ func ParseUpdate(state *State, command []string) {
 		(*state).round = round
 	case "field":
 		fmt.Fprintf(os.Stderr, errorStr+"Field parsing is not yet implemented\n")
+		field1D := strings.Split(command[3], ",")
+
+		for i := 0; i < len(field1D); i += settings.fieldWidth {
+			(*state).field = append((*state).field, field1D[i:i+settings.fieldWidth])
+		}
 	case "snippets":
 		snippets, err := strconv.Atoi(command[3])
 		if err != nil {
@@ -99,12 +104,13 @@ func ParseUpdate(state *State, command []string) {
 			fmt.Fprintln(os.Stderr, errorStr+"Unhandled player enountered in update. Player: ", command[1])
 		}
 	default:
-		fmt.Fprintln(os.Stderr, "Unhandled update type. Detail:", command)
+		fmt.Fprintln(os.Stderr, errorStr+"Unhandled update type. Detail:", command)
 	}
 }
 
 // ParseAction takes a State object to modify,
 // and a command tuple of the format "action character t"
+// returns either "character" or "move"
 func ParseAction(state *State, command []string) (commandType string) {
 	fmt.Println(infoStr+"Parsing action: ", command)
 	timeRemaining, err := strconv.Atoi(command[2])

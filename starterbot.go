@@ -3,12 +3,13 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 )
 
 var errorStr = "ERROR:"
-var infoStr = "INFO: "
+var infoStr = "INFO:"
 
 // Settings contains all initial game settings
 type Settings struct {
@@ -17,9 +18,10 @@ type Settings struct {
 	yourBot                                                              string
 
 	character string // bixie or bixiette
+	moves     [4]string
 }
 
-// State holds the player and field info
+// State holds the game features that update
 type State struct {
 	players       [2]Player
 	field         [][]string
@@ -36,8 +38,8 @@ var settings = Settings{}
 var game = State{}
 
 func main() {
-	//game.players[0], game.players[1] = Player{}, Player{}
 	settings.character = "bixiette"
+	settings.moves = [4]string{"up", "left", "down", "right"}
 	for {
 		processInput()
 	}
@@ -47,13 +49,13 @@ func processInput() {
 	scanner := bufio.NewScanner(os.Stdin)
 	if !scanner.Scan() {
 		if err := scanner.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "Scan error: %s\n", err)
+			fmt.Fprintf(os.Stderr, errorStr+"Scan error: %s\n", err)
 		}
 	}
 
 	command := strings.Split(scanner.Text(), " ")
 	if len(command) < 3 {
-		fmt.Fprintf(os.Stderr, "Invalid command block length: %s\n", command)
+		fmt.Fprintf(os.Stderr, errorStr+"Invalid command block length: %s\n", command)
 	}
 	switch command[0] {
 	case "settings":
@@ -70,13 +72,14 @@ func processInput() {
 			fmt.Fprintf(os.Stderr, errorStr+"Unrecognized return from ParseAction")
 		}
 	default:
-		fmt.Fprintf(os.Stderr, "Received unhandled command type: %s\n", command)
-		fmt.Fprintf(os.Stderr, "Settings: %+#v\n", settings)
-		fmt.Fprintf(os.Stderr, "State: %+#v", game)
+		fmt.Fprintf(os.Stderr, infoStr+"Received unhandled command type: %s\n", command)
+		fmt.Fprintf(os.Stderr, infoStr+"Settings: %+v\n", settings)
+		fmt.Fprintf(os.Stderr, infoStr+"State: %+v\n", game)
 	}
 
 }
 
+// DoMove sends intended movement to the engine
 func DoMove() {
-	fmt.Println("right")
+	fmt.Println(settings.moves[rand.Intn(len(settings.moves))])
 }
