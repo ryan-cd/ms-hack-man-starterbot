@@ -60,6 +60,13 @@ func processInput() {
 	switch command[0] {
 	case "settings":
 		ParseSettings(&settings, command)
+		// Initialize field if it hasn't been, and the dimensions are known
+		if settings.fieldHeight > 0 && settings.fieldWidth > 0 && len(game.field) != settings.fieldHeight {
+			for i := 0; i < settings.fieldHeight; i++ {
+				boardRow := make([]string, settings.fieldWidth)
+				game.field = append(game.field, boardRow)
+			}
+		}
 	case "update":
 		ParseUpdate(&game, command)
 	case "action":

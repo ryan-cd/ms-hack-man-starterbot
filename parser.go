@@ -10,7 +10,6 @@ import (
 // ParseSettings takes a Settings object to modify,
 // and a command tuple of the format "settings timebank 10000"
 func ParseSettings(settings *Settings, command []string) {
-	fmt.Println(infoStr+"Parsing settings: ", command)
 	switch command[1] {
 	case "timebank":
 		time, err := strconv.Atoi(command[2])
@@ -64,7 +63,6 @@ func ParseSettings(settings *Settings, command []string) {
 // ParseUpdate takes a Settings object to modify,
 // and a command tuple of the format "update game round 0"
 func ParseUpdate(state *State, command []string) {
-	fmt.Println(infoStr+"Parsing update: ", command)
 	switch command[2] {
 	case "round":
 		round, err := strconv.Atoi(command[3])
@@ -73,11 +71,10 @@ func ParseUpdate(state *State, command []string) {
 		}
 		(*state).round = round
 	case "field":
-		fmt.Fprintf(os.Stderr, errorStr+"Field parsing is not yet implemented\n")
 		field1D := strings.Split(command[3], ",")
 
 		for i := 0; i < len(field1D); i += settings.fieldWidth {
-			(*state).field = append((*state).field, field1D[i:i+settings.fieldWidth])
+			(*state).field[i/settings.fieldWidth] = field1D[i : i+settings.fieldWidth]
 		}
 	case "snippets":
 		snippets, err := strconv.Atoi(command[3])
@@ -112,7 +109,6 @@ func ParseUpdate(state *State, command []string) {
 // and a command tuple of the format "action character t"
 // returns either "character" or "move"
 func ParseAction(state *State, command []string) (commandType string) {
-	fmt.Println(infoStr+"Parsing action: ", command)
 	timeRemaining, err := strconv.Atoi(command[2])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, errorStr+"Unable to parse time remaining. Detail: ", command)
