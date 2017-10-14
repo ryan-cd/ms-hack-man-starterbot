@@ -62,7 +62,7 @@ func ParseSettings(settings *Settings, command []string) {
 
 // ParseUpdate takes a Settings object to modify,
 // and a command tuple of the format "update game round 0"
-func ParseUpdate(state *State, command []string) {
+func ParseUpdate(state *State, command []string, fieldWidth int) {
 	switch command[2] {
 	case "round":
 		round, err := strconv.Atoi(command[3])
@@ -73,8 +73,10 @@ func ParseUpdate(state *State, command []string) {
 	case "field":
 		field1D := strings.Split(command[3], ",")
 
-		for i := 0; i < len(field1D); i += settings.fieldWidth {
-			(*state).field[i/settings.fieldWidth] = field1D[i : i+settings.fieldWidth]
+		if fieldWidth > 0 {
+			for i := 0; i < len(field1D); i += fieldWidth {
+				(*state).field.field[i/fieldWidth] = field1D[i : i+fieldWidth]
+			}
 		}
 	case "snippets":
 		snippets, err := strconv.Atoi(command[3])

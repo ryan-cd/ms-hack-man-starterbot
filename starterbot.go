@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/rand"
 	"os"
 	"strings"
 )
@@ -24,7 +23,7 @@ type Settings struct {
 // State holds the game features that update
 type State struct {
 	players       [2]Player
-	field         [][]string
+	field         Field
 	round         int
 	timeRemaining int
 }
@@ -34,59 +33,56 @@ type Player struct {
 	snippets, bombs int
 }
 
+var scanner *bufio.Scanner
 var settings = Settings{}
 var game = State{}
 
 func main() {
+	scanner = bufio.NewScanner(os.Stdin)
 	settings.character = "bixiette"
 	settings.moves = [4]string{"up", "left", "down", "right"}
-	for {
-		processInput()
-	}
+	processInput()
+
 }
 
 func processInput() {
-	scanner := bufio.NewScanner(os.Stdin)
-	if !scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, errorStr+"Scan error: %s\n", err)
-		}
-	}
+	for scanner.Scan() {
+		command := strings.Split(scanner.Text(), " ")
 
-	command := strings.Split(scanner.Text(), " ")
-	if len(command) < 3 {
-		fmt.Fprintf(os.Stderr, errorStr+"Invalid command block length: %s\n", command)
-	}
-	switch command[0] {
-	case "settings":
-		ParseSettings(&settings, command)
-		// Initialize field if it hasn't been, and the dimensions are known
-		if settings.fieldHeight > 0 && settings.fieldWidth > 0 && len(game.field) != settings.fieldHeight {
-			for i := 0; i < settings.fieldHeight; i++ {
-				boardRow := make([]string, settings.fieldWidth)
-				game.field = append(game.field, boardRow)
+		if len(command) < 3 {
+			return
+		}
+		switch command[0] {
+		case "settings":
+			ParseSettings(&settings, command)
+			// Initialize field if it hasn't been, and the dimensions are known
+			if settings.fieldHeight > 0 && settings.fieldWidth > 0 && len(game.field.field) != settings.fieldHeight {
+				game.field.Initialize(settings.fieldWidth, settings.fieldHeight)
 			}
-		}
-	case "update":
-		ParseUpdate(&game, command)
-	case "action":
-		switch ParseAction(&game, command) {
-		case "character":
-			fmt.Println(settings.character) // send the engine who we want to play as
-		case "move":
-			DoMove()
+		case "update":
+			ParseUpdate(&game, command, settings.fieldWidth)
+		case "action":
+			switch ParseAction(&game, command) {
+			case "character":
+				fmt.Println(settings.character) // send the engine who we want to play as
+			case "move":
+				DoMove()
+			default:
+				fmt.Fprintf(os.Stderr, errorStr+"Unrecognized return from ParseAction")
+			}
 		default:
-			fmt.Fprintf(os.Stderr, errorStr+"Unrecognized return from ParseAction")
+			fmt.Fprintf(os.Stderr, infoStr+"Received unhandled command type: %s\n", command)
+			fmt.Fprintf(os.Stderr, infoStr+"Settings: %+v\n", settings)
+			fmt.Fprintf(os.Stderr, infoStr+"State: %+v\n", game)
 		}
-	default:
-		fmt.Fprintf(os.Stderr, infoStr+"Received unhandled command type: %s\n", command)
-		fmt.Fprintf(os.Stderr, infoStr+"Settings: %+v\n", settings)
-		fmt.Fprintf(os.Stderr, infoStr+"State: %+v\n", game)
 	}
-
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, errorStr+"Scan error: %s\n", err)
+	}
 }
 
 // DoMove sends intended movement to the engine
 func DoMove() {
-	fmt.Println(settings.moves[rand.Intn(len(settings.moves))])
+	//fmt.Println(settings.moves[rand.Intn(len(settings.moves))])
+	fmt.Fprintf(os.Stdout, "pass\n")
 }
