@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 )
@@ -17,7 +18,6 @@ type Settings struct {
 	yourBot                                                              string
 
 	character string // bixie or bixiette
-	moves     [4]string
 }
 
 // State holds the game features that update
@@ -40,11 +40,11 @@ var game = State{}
 func main() {
 	scanner = bufio.NewScanner(os.Stdin)
 	settings.character = "bixiette"
-	settings.moves = [4]string{"up", "left", "down", "right"}
 	processInput()
 
 }
 
+// Main game loop to handle communication from and to engine
 func processInput() {
 	for scanner.Scan() {
 		command := strings.Split(scanner.Text(), " ")
@@ -56,11 +56,11 @@ func processInput() {
 		case "settings":
 			ParseSettings(&settings, command)
 			// Initialize field if it hasn't been, and the dimensions are known
-			if settings.fieldHeight > 0 && settings.fieldWidth > 0 && len(game.field.field) != settings.fieldHeight {
-				game.field.Initialize(settings.fieldWidth, settings.fieldHeight)
+			if settings.fieldHeight > 0 && settings.fieldWidth > 0 && len(game.field.GetBoard()) != settings.fieldHeight {
+				game.field.Initialize(settings.fieldWidth, settings.fieldHeight, settings.yourBotID)
 			}
 		case "update":
-			ParseUpdate(&game, command, settings.fieldWidth)
+			ParseUpdate(&game, command)
 		case "action":
 			switch ParseAction(&game, command) {
 			case "character":
@@ -74,6 +74,7 @@ func processInput() {
 			fmt.Fprintf(os.Stderr, infoStr+"Received unhandled command type: %s\n", command)
 			fmt.Fprintf(os.Stderr, infoStr+"Settings: %+v\n", settings)
 			fmt.Fprintf(os.Stderr, infoStr+"State: %+v\n", game)
+			game.field.PrintBoard()
 		}
 	}
 	if err := scanner.Err(); err != nil {
@@ -83,6 +84,23 @@ func processInput() {
 
 // DoMove sends intended movement to the engine
 func DoMove() {
-	//fmt.Println(settings.moves[rand.Intn(len(settings.moves))])
-	fmt.Fprintf(os.Stdout, "pass\n")
+	var validMoves []string
+	if game.field.CanMove(UP) {
+		validMoves = append(validMoves, "up")
+	}
+	if game.field.CanMove(LEFT) {
+		validMoves = append(validMoves, "left")
+	}
+	if game.field.CanMove(DOWN) {
+		validMoves = append(validMoves, "down")
+	}
+	if game.field.CanMove(RIGHT) {
+		validMoves = append(validMoves, "right")
+	}
+
+	if len(validMoves) == 0 {
+		fmt.Fprintln(os.Stdout, "pass")
+	} else {
+		fmt.Fprintln(os.Stdout, validMoves[rand.Intn(len(validMoves))])
+	}
 }
