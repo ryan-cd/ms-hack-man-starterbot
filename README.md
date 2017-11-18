@@ -1,6 +1,6 @@
 # Ms Hack Man Starterbot
 
-This bot is a "starter bot" for the [Ms. Hack Man](https://booking.riddles.io/competitions/ms.-hack-man) competition hosted by booking.com. 
+This project is the official golang "starter bot" for the [Ms. Hack Man](https://booking.riddles.io/competitions/ms.-hack-man) competition, hosted by booking.com. It can be downloaded from the [how to play](https://booking.riddles.io/competitions/ms.-hack-man/how-to-play) page.
 
 The starter bot is able to make valid (but random) moves around the board. It is used as a baseline point for other developers to copy the code, and implement a search algorithm on top of it. 
 
